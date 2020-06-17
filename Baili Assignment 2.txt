@@ -1,0 +1,109 @@
+Sub stocks():
+'getting worksheet and data range
+Dim worksheetname As String
+Dim numRows, numColumns As Long
+worksheetname = ActiveSheet.Name
+numRows = ActiveSheet.UsedRange.Rows.count
+numColumns = ActiveSheet.UsedRange.Columns.count
+
+MsgBox (worksheetname)
+MsgBox (numRows)
+MsgBox (numColumns)
+
+'getting tickers name
+Dim i, count As Integer
+count = 0
+For i = 1 To (numRows - 1)
+If Cells(i, 1).Value <> Cells(i + 1, 1) Then
+count = count + 1
+Cells(count, (numColumns + 2)).Value = Cells(i, 1).Value
+End If
+Next i
+
+'getting yearly price change and total volume
+Dim openPrice, closePrice, yearlyChange, percentChange As Double
+Dim start As Boolean
+start = False
+Total = 0
+
+Cells(1, (numColumns + 3)).Value = "Yearly Change"
+Cells(1, (numColumns + 4)).Value = "Percent Change"
+Cells(1, (numColumns + 5)).Value = "Total Stock Volume"
+
+count = 2
+For i = 2 To numRows / 3
+If Cells(i, 1).Value = Cells(i + 1, 1).Value Then
+If start = False Then
+openPrice = Cells(i, 3)
+start = True
+'MsgBox (openPrice)
+End If
+
+Total = Total + Cells(i, 7).Value
+
+Else
+closePrice = Cells(i, 6).Value
+start = False
+'adding last row of volumn
+Total = Total + Cells(i, 7).Value
+Cells(count, (numColumns + 5)).Value = Total
+Total = 0
+'MsgBox (closePrice)
+yearlyChange = closePrice - openPrice
+percentChange = Round((yearlyChange / openPrice), 4)
+'MsgBox (yearlyChange)
+'MsgBox (percentChange)
+'msgbox (total)
+
+Cells(count, (numColumns + 3)).Value = yearlyChange
+Cells(count, (numColumns + 4)).Value = percentChange
+Cells(count, (numColumns + 4)).NumberFormat = "0.00%"
+count = count + 1
+
+End If
+Next i
+
+'formatting index
+For i = 2 To Range("L" & Rows.count).End(xlUp).Row
+If Cells(i, numColumns + 3).Value < 0 Then
+Cells(i, numColumns + 3).Interior.ColorIndex = 10
+Else
+Cells(i, numColumns + 3).Interior.ColorIndex = 3
+End If
+Next i
+
+'Getting greatest values
+Cells(2, (numColumns + 8)).Value = "Greatest % Increase"
+Cells(3, (numColumns + 8)).Value = "Greatest % Decrease"
+Cells(4, (numColumns + 8)).Value = "Greatest Total Volume"
+
+Cells(1, (numColumns + 9)).Value = "Ticker"
+Cells(1, (numColumns + 10)).Value = "Value"
+
+Cells(2, (numColumns + 10)).Value = Application.WorksheetFunction.Max(Range("K:K"))
+Cells(2, (numColumns + 10)).NumberFormat = "0.00%"
+Cells(3, (numColumns + 10)).Value = Application.WorksheetFunction.Min(Range("K:K"))
+Cells(3, (numColumns + 10)).NumberFormat = "0.00%"
+Cells(4, (numColumns + 10)).Value = Application.WorksheetFunction.Max(Range("L:L"))
+
+'look for tickers of greatest values
+For i = 2 To Range("K" & Rows.count).End(xlUp).Row
+If Cells(i, (numColumns + 4)).Value = Application.WorksheetFunction.Max(Range("K:K")) Then
+Cells(2, (numColumns + 9)).Value = Cells(i, (numColumns + 2))
+End If
+Next i
+
+For i = 2 To Range("K" & Rows.count).End(xlUp).Row
+If Cells(i, (numColumns + 4)).Value = Application.WorksheetFunction.Min(Range("K:K")) Then
+Cells(3, (numColumns + 9)).Value = Cells(i, (numColumns + 2))
+End If
+Next i
+
+For i = 2 To Range("L" & Rows.count).End(xlUp).Row
+If Cells(i, (numColumns + 5)).Value = Application.WorksheetFunction.Max(Range("L:L")) Then
+Cells(4, (numColumns + 9)).Value = Cells(i, (numColumns + 2))
+End If
+Next i
+
+
+End Sub
